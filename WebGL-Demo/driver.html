@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="driver.css">
+    <title>Create Shapes</title>
+    <!-- Load external libs -->
+    <script src="../lib/cuon-matrix-cse160.js"></script>
+    <script src="../lib/cuon-utils.js"></script>
+    <script src="../lib/webgl-debug.js"></script>
+    <script src="../lib/webgl-utils.js"></script>
+    <!-- Load internal libs -->
+    <script src="camera.js"></script>
+    <script src="./models/Model.js"></script>
+    <script src="./models/Cylinder.js"></script>
+    <script src="./models/Sphere.js"></script>
+    <script src="./models/Cube.js"></script>
+    <script src="./object%20data/_downloader.js"></script>
+    <script src="./object%20data/cylinder_data.js"></script>
+    <script src="./object%20data/cube_data.js"></script>
+    <script src="./object%20data/sphere_data.js"></script>
+    <script src="./secret/secretFunctions.js"></script>
+    <!-- Load main -->
+    <script src="asg4.js"></script>
+  </head>
+  
+  <body onload="main()">
+    <canvas id="viewer" width="500" height="500" style="background: url('https://i.imgur.com/GjnyeEN.png')"></canvas>
+
+    <!-- START secret wrapper -->
+    <div id="secret">
+      <label for="pokemon">Choose your pokemon:</label>
+      <select id="pokemon" onchange="handleSecretEvent(this.value)">
+        <option default value="pikachu">Pikachu</option>
+        <option value="charmander">Charmander</option>
+        <option value="squirtle">Squirtle</option>
+        <option value="bulbasaur">Bulbasaur</option>
+      </select>
+    </div>
+    <!-- END secret wrapper -->
+
+    <!-- START cylinder inputs wrapper -->
+    <div>
+      <!-- Create Cylinder -->
+      <br/>
+      <table>
+        <caption style="text-align:left">Create Model:</caption>
+        <tr>
+          <td><label for="model-create">Type:</label></td>
+          <td>
+            <select id="model-create">
+              <option value="cylinder">Cylinder</option>
+              <option value="cube">Cube</option>
+              <option value="sphere">Sphere</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td><label for="num-of-sides">N:</label></td>
+          <td><input id="num-of-sides" type="number" style="width: 60px"></input></td>
+          <td style="width: 30px"></td>
+          <td><label for="draw-mode" style="text-align:center">Point light</label></td>
+          <td style="width: 30px"></td>
+          <td><label for="draw-mode" style="text-align:center">Directional light</label></td>
+          <td style="width: 30px"></td>
+          <td><label for="draw-mode" style="text-align:center">View Mode</label></td>
+          <td style="width: 30px"></td>
+          <td><label for="draw-mode" style="text-align:center">Draw mode</label></td>
+        </tr>
+        <tr>
+          <td><label for="model-color">Color:</label></td>
+          <td><input id="model-color" type="color" style="width: 60px" value="#8C00FF"></input></td>
+          <td style="width: 30px"></td>
+          <td><button id="draw-mode" style="width: 60px; margin-left: 3px" onclick="togglePointLight()">Toggle</label></td>
+          <td style="width: 30px"></td>
+          <td><button id="draw-mode" style="width: 60px; margin-left: 18px" onclick="toggleDirectionalLight()">Toggle</label></td>
+          <td style="width: 30px"></td>
+          <td><button id="draw-mode" style="width: 60px; margin-left: 7px" onclick="toggleCameraMode()">Toggle</label></td>
+          <td style="width: 30px"></td>
+          <td><button id="draw-mode" style="width: 60px; margin-left: 6px" onclick="toggleDrawMode()">Toggle</label></td>
+        </tr>
+        <tr>
+            <td><button type="button" onclick="handleAddModel()">Add</button></td>
+        </tr>
+      </table>
+    </div>
+    <!-- END cylinder inputs wrapper -->
+
+    <!-- START transform inputs wrapper -->
+    <div>
+      <br/>
+      <div>
+        Select Model: 
+        <select id="model-select" style="width: 90px; margin-left:2px">
+          <option selected disabled></option>
+        </select>
+        <button id="shader-mode" type="button" style="margin-left:15px" onClick="toggleShaderMode()">Toggle Shader Mode</button>
+        <button id="download-data" type="button" style="margin-left:15px" onClick="handleDownloadEvent()">Download Model data</button>
+        <button id="download-data" type="button" style="margin-left:15px" onClick="deleteAllModels()">Delete All Models</button>
+      </div>
+      <br/>
+      <table>
+        <tr>
+          <td></td>
+          <td style="text-align:center">x</td>
+          <td style="text-align:center">y</td>
+          <td style="text-align:center">z</td>
+        </tr>
+        <tr>
+          <td>Translate:</td>
+          <td><input type="range" min="-100" max="100" oninput="onChangeTranslate(this.value, 'x')"></input></td>
+          <td><input type="range" min="-100" max="100" oninput="onChangeTranslate(this.value, 'y')"></input></td>
+          <td><input type="range" min="-100" max="100" oninput="onChangeTranslate(this.value, 'z')"></input></td>
+        </tr>
+        <tr>
+          <td>Rotate:</td>
+          <td><input type="range" min="0" max="360" oninput="onChangeRotate(this.value, 'x')"></input></td>
+          <td><input type="range" min="0" max="360" oninput="onChangeRotate(this.value, 'y')"></input></td>
+          <td><input type="range" min="0" max="360" oninput="onChangeRotate(this.value, 'z')"></input></td>
+          <td style="text-align:center">xyz:</td>
+        </tr>
+        <tr>
+          <td>Scale:</td>
+          <td><input type="range" min="1" max="200" oninput="onChangeScale(this.value, 'x')"></input></td>
+          <td><input type="range" min="1" max="200" oninput="onChangeScale(this.value, 'y')"></input></td>
+          <td><input type="range" min="1" max="200" oninput="onChangeScale(this.value, 'z')"></input></td>
+          <td><input type="range" min="1" max="200" oninput="onChangeScale(this.value, 'all')"></input></td>
+        </tr>
+      </table>
+    </div>
+    <!-- END transform inputs wrapper -->
+
+    <br /><br />
+
+    <!-- START move point light wrapper -->
+    <div>
+      &nbsp;Move point light:
+      <Table>
+        <tr>
+          <td>Translate:</td>
+          <td><input type="range" min="-100" max="100" oninput="onTranslateLight(this.value, 'x')"></input></td>
+          <td><input type="range" min="-100" max="100" oninput="onTranslateLight(this.value, 'y')"></input></td>
+          <td><input type="range" min="-100" max="100" oninput="onTranslateLight(this.value, 'z')"></input></td>
+          <td><button id="shader-mode" type="button" onClick="toggleRotateLight()">Toggle Light Rotation</button></td>
+        </tr>
+      </Table>
+    </div>
+    <!-- END move point light wrapper -->
+  </body>
+</html>
